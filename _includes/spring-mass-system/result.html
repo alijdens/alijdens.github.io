@@ -1,0 +1,93 @@
+<div>
+    <canvas style="display: block;" id="canvas_result"></canvas>
+
+    {% include spring-mass-system/engine.html %}
+    
+    <script>
+        // springs and masses
+        const mass = 0.5;
+        const nodes = [
+            {pos: {x: 300, y: 200}, vel: {x: 0, y: 0}, mass: mass, visible: true},
+            {pos: {x: 300, y: 200}, vel: {x: 0, y: 0}, mass: mass, visible: true},
+            {pos: {x: 300, y: 200}, vel: {x: 0, y: 0}, mass: mass, visible: true},
+            {pos: {x: 300, y: 200}, vel: {x: 0, y: 0}, mass: mass, visible: true},
+            {pos: {x: 300, y: 200}, vel: {x: 0, y: 0}, mass: mass, visible: true},
+            {pos: {x: 300, y: 200}, vel: {x: 0, y: 0}, mass: mass, visible: true},
+            {pos: {x: 300, y: 200}, vel: {x: 0, y: 0}, mass: mass, visible: true},
+
+            // invisible that force the other nodes to the final position
+            {pos: {x: 250, y: 200}, vel: {x: 0, y: 0}, mass: Infinity, visible: false},
+            {pos: {x: 350, y: 150}, vel: {x: 0, y: 0}, mass: Infinity, visible: false},
+            {pos: {x: 350, y: 250}, vel: {x: 0, y: 0}, mass: Infinity, visible: false},
+            {pos: {x: 450, y: 100}, vel: {x: 0, y: 0}, mass: Infinity, visible: false},
+            {pos: {x: 450, y: 175}, vel: {x: 0, y: 0}, mass: Infinity, visible: false},
+            {pos: {x: 450, y: 225}, vel: {x: 0, y: 0}, mass: Infinity, visible: false},
+            {pos: {x: 450, y: 300}, vel: {x: 0, y: 0}, mass: Infinity, visible: false},
+        ];
+        const springs = new Map([
+            // the spring length is the distance between the nodes when they are in
+            // their final position
+            ['0-1', 111.803399],
+            ['0-2', 111.803399],
+            ['1-3', 111.803399],
+            ['1-4', 111.803399],
+            ['2-5', 111.803399],
+            ['2-6', 111.803399],
+
+            // use 0 length springs so that the nodes end up in the correct position
+            ['0-7', 0],
+            ['1-8', 0],
+            ['2-9', 0],
+            ['3-10', 0],
+            ['4-11', 0],
+            ['5-12', 0],
+            ['6-13', 0],
+        ]);
+
+        const dt = 1/60;
+        var startT = null;
+
+        function onFrame(t) {
+            // calculate elapsed time since last update
+            if (!startT) {
+                startT = t;
+            }
+            let elapsed = (t - startT) / 1000;
+
+            if (elapsed > 5) {
+                // too much time has passed, reset the start time so we don't run many updates
+                // this could happen if the tab was inactive for a while
+                startT = t;
+                elapsed = 0;
+            }
+
+            // use a constant time step for the simulation
+            let hasUpdated = false;
+            while(elapsed >= dt) {
+                hasUpdated |= stepSimulation(nodes, springs, dt);
+
+                elapsed -= dt;
+                startT += dt * 1000;
+            }
+
+            if (hasUpdated) {
+                // update the node positions
+                draw(nodes, springs);
+            }
+
+            // wait for the next frame
+            requestAnimationFrame(onFrame);
+        }
+
+        const ctx = document.getElementById('canvas_result').getContext('2d');
+        ctx.canvas.style.width = "100%";
+        ctx.canvas.style.height = "400px";
+        ctx.canvas.width = ctx.canvas.offsetWidth;
+        ctx.canvas.height = ctx.canvas.offsetHeight;
+
+        // start execution
+        requestAnimationFrame(onFrame);
+    </script>
+
+    {% include spring-mass-system/ui.html %}
+</div>

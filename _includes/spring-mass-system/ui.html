@@ -1,0 +1,77 @@
+<script>
+
+const nodeRadius = 10;
+
+function draw(nodes, springs) {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+    for(const node of nodes) {
+        if (node.visible) {
+            ctx.fillStyle = 'black';
+            ctx.beginPath();
+            ctx.arc(node.pos.x, node.pos.y, nodeRadius, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+    }
+    for (const [key, value] of springs) {
+        const [i, j] = key.split('-');
+        const n1 = nodes[parseInt(i)];
+        const n2 = nodes[parseInt(j)];
+
+        if (parseInt(i) < 7 && parseInt(j) < 7) {
+            ctx.beginPath();
+            ctx.moveTo(n1.pos.x, n1.pos.y);
+            ctx.lineTo(n2.pos.x, n2.pos.y);
+            ctx.stroke();
+        }
+    }
+}
+
+// translate the event mouse position to the canvas coordinate system
+function getMousePos(evt) {
+    var rect = ctx.canvas.getBoundingClientRect();
+    return {
+        x: evt.clientX - rect.left,
+        y: evt.clientY - rect.top
+    };
+}
+
+// node being dragged by the mouse
+let dragNode = null;
+
+ctx.canvas.addEventListener('mousedown', function(event) {
+    const { x, y } = getMousePos(event);
+    
+    nodes.forEach(node => {
+        if (node.mass === Infinity) {
+            return;
+        }
+
+        const dx = node.pos.x - x,
+              dy = node.pos.y - y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist <= nodeRadius) {
+            // the node was clicked
+
+            dragNode = node;
+            // set mass to infinity so the simulation won't move it (only the mouse)
+            dragNode.mass = Infinity;
+            dragNode.vel = {x: 0, y: 0};
+        }
+    });
+}, false);
+
+ctx.canvas.addEventListener('mousemove', function(event) {
+    if (dragNode) {
+        const { x, y } = getMousePos(event);
+        dragNode.pos.x = x;
+        dragNode.pos.y = y;
+    }
+}, false);
+
+ctx.canvas.addEventListener('mouseup', function(event) {
+    dragNode.mass = mass;
+    dragNode = null;
+}, false);
+</script>

@@ -1,0 +1,76 @@
+<script>
+function stepSimulation(nodes, springs, dt) {
+    const damp = 1.1;  // damp factor (energy loss)
+
+    // force acting on each node
+    const F = [];
+    for (const n of nodes) {
+        F.push({x: 0, y: 0});
+    }
+    for (let i = 0; i < nodes.length; i++) {
+        const n1 = nodes[i];
+
+        // calculate the force acting on the node
+        // we start by adding a force that will dampen the velocity
+        F[i].x += -damp * n1.vel.x
+        F[i].y += -damp * n1.vel.y;
+
+        // calculate force applied on node i
+        for (let j = i + 1; j < nodes.length; j++) {
+            if (!springs.has(`${i}-${j}`)) {
+                continue;
+            }
+
+            const n2 = nodes[j];
+            const k = (n1.mass + n2.mass === Infinity) ? 30 : 3;  // spring constant
+
+            // calculate the distance between the nodes
+            const dx = n2.pos.x - n1.pos.x;
+            const dy = n2.pos.y - n1.pos.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            // angle of the distance vector between n1 and n2
+            const angle = Math.atan2(dy, dx);
+
+            // spring stretch from the natural length
+            const [lx, ly] = [
+                // calculate the X and Y components of the spring length vector
+                Math.cos(angle) * springs.get(`${i}-${j}`),
+                Math.sin(angle) * springs.get(`${i}-${j}`),
+            ];
+
+            // spring force on the node
+            F[i].x += k * (dx - lx);
+            F[i].y += k * (dy - ly);
+
+            // spring force on the other node
+            F[j].x -= k * (dx - lx);
+            F[j].y -= k * (dy - ly);
+        }
+
+        // calculate acceleration from the force and mass
+        const a = {x: F[i].x / n1.mass, y: F[i].y / n1.mass};
+
+        // integrate the acceleration to get the new velocity
+        n1.vel.x += a.x * dt;
+        n1.vel.y += a.y * dt;
+    }
+
+    // check if any node has moved to avoid redrawing the canvas needlessly
+    let hasUpdated = true;
+
+    // integrate the velocity to get the new position
+    for(const node of nodes) {
+        const [dx, dy] = [node.vel.x * dt, node.vel.y * dt];
+
+        node.pos.x += dx;
+        node.pos.y += dy;
+
+        if (Math.abs(dx) > 0.05 || Math.abs(dy) > 0.05) {
+            hasUpdated = true;
+        }
+    }
+
+    return hasUpdated;
+}
+</script>
