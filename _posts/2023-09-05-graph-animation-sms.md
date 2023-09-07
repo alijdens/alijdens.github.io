@@ -179,7 +179,7 @@ calculate the force:
 
 The following interactive example shows the force that the spring exerts on the attached mass (assuming the other end of the spring is connected to a fixed point):
 
-<iframe src="https://codesandbox.io/embed/spring-mass-system-pktlhk?fontsize=14&hidenavigation=1&hidedevtools=1&module=/src/hooke.mjs,/src/spring-force/elements.mjs&theme=dark&initialpath=/src/spring-force/index.html&forcerefresh=1&view=split"
+<iframe src="https://codesandbox.io/embed/spring-mass-system-pktlhk?fontsize=14&hidenavigation=1&hidedevtools=1&module=/src/hooke.mjs,/src/spring-force/elements.mjs&theme=dark&initialpath=/src/spring-force/index.html&forcerefresh=1"
      style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;"
      title="spring-mass-system"
      sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"

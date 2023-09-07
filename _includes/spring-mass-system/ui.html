@@ -39,7 +39,32 @@ function getMousePos(evt) {
 // node being dragged by the mouse
 let dragNode = null;
 
-ctx.canvas.addEventListener('mousedown', function(event) {
+ctx.canvas.addEventListener('mousedown', onPress, false);
+ctx.canvas.addEventListener('mousemove', onDrag, false);
+ctx.canvas.addEventListener('mouseup', onRelease, false);
+
+ctx.canvas.addEventListener('touchstart', onTouchStart, false);
+ctx.canvas.addEventListener('touchmove', onTouchMove, false);
+ctx.canvas.addEventListener('touchend', onRelease, false);
+ctx.canvas.addEventListener('touchcancel', onRelease, false);
+
+function onTouchStart(event) {
+    for (const touch of event.changedTouches) {
+        onPress(touch, 3);
+    }
+}
+
+function onTouchMove(event) {
+    if (dragNode) {
+        // this avoids the screen from scrolling when dragging the node
+        event.preventDefault();
+    }
+    for (const touch of event.changedTouches) {
+        onDrag(touch);
+    }
+}
+
+function onPress(event, sensibility = 1) {
     const { x, y } = getMousePos(event);
     
     nodes.forEach(node => {
@@ -51,7 +76,7 @@ ctx.canvas.addEventListener('mousedown', function(event) {
               dy = node.pos.y - y;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
-        if (dist <= nodeRadius) {
+        if (dist <= nodeRadius * sensibility) {
             // the node was clicked
 
             dragNode = node;
@@ -60,18 +85,19 @@ ctx.canvas.addEventListener('mousedown', function(event) {
             dragNode.vel = {x: 0, y: 0};
         }
     });
-}, false);
+}
 
-ctx.canvas.addEventListener('mousemove', function(event) {
+function onDrag(event) {
     if (dragNode) {
         const { x, y } = getMousePos(event);
         dragNode.pos.x = x;
         dragNode.pos.y = y;
     }
-}, false);
+}
 
-ctx.canvas.addEventListener('mouseup', function(event) {
+function onRelease(event) {
     dragNode.mass = mass;
     dragNode = null;
-}, false);
+}
+
 </script>

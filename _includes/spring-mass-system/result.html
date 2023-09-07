@@ -4,25 +4,33 @@
     {% include spring-mass-system/engine.html %}
     
     <script>
+        const ctx = document.getElementById('canvas_result').getContext('2d');
+        ctx.canvas.style.width = "100%";
+        ctx.canvas.style.height = "400px";
+        ctx.canvas.width = ctx.canvas.offsetWidth;
+        ctx.canvas.height = ctx.canvas.offsetHeight;
+
+        const [cx, cy] = [ctx.canvas.width / 2, ctx.canvas.height / 2];
+
         // springs and masses
         const mass = 0.5;
         const nodes = [
-            {pos: {x: 300, y: 200}, vel: {x: 0, y: 0}, mass: mass, visible: true},
-            {pos: {x: 300, y: 200}, vel: {x: 0, y: 0}, mass: mass, visible: true},
-            {pos: {x: 300, y: 200}, vel: {x: 0, y: 0}, mass: mass, visible: true},
-            {pos: {x: 300, y: 200}, vel: {x: 0, y: 0}, mass: mass, visible: true},
-            {pos: {x: 300, y: 200}, vel: {x: 0, y: 0}, mass: mass, visible: true},
-            {pos: {x: 300, y: 200}, vel: {x: 0, y: 0}, mass: mass, visible: true},
-            {pos: {x: 300, y: 200}, vel: {x: 0, y: 0}, mass: mass, visible: true},
+            {pos: {x: cx, y: cy}, vel: {x: 0, y: 0}, mass: mass, visible: true},
+            {pos: {x: cx, y: cy}, vel: {x: 0, y: 0}, mass: mass, visible: true},
+            {pos: {x: cx, y: cy}, vel: {x: 0, y: 0}, mass: mass, visible: true},
+            {pos: {x: cx, y: cy}, vel: {x: 0, y: 0}, mass: mass, visible: true},
+            {pos: {x: cx, y: cy}, vel: {x: 0, y: 0}, mass: mass, visible: true},
+            {pos: {x: cx, y: cy}, vel: {x: 0, y: 0}, mass: mass, visible: true},
+            {pos: {x: cx, y: cy}, vel: {x: 0, y: 0}, mass: mass, visible: true},
 
-            // invisible that force the other nodes to the final position
-            {pos: {x: 250, y: 200}, vel: {x: 0, y: 0}, mass: Infinity, visible: false},
-            {pos: {x: 350, y: 150}, vel: {x: 0, y: 0}, mass: Infinity, visible: false},
-            {pos: {x: 350, y: 250}, vel: {x: 0, y: 0}, mass: Infinity, visible: false},
-            {pos: {x: 450, y: 100}, vel: {x: 0, y: 0}, mass: Infinity, visible: false},
-            {pos: {x: 450, y: 175}, vel: {x: 0, y: 0}, mass: Infinity, visible: false},
-            {pos: {x: 450, y: 225}, vel: {x: 0, y: 0}, mass: Infinity, visible: false},
-            {pos: {x: 450, y: 300}, vel: {x: 0, y: 0}, mass: Infinity, visible: false},
+            // invisible nodes that force the other nodes to the final position
+            {pos: {x: cx - 100, y: cy +   0}, vel: {x: 0, y: 0}, mass: Infinity, visible: false},
+            {pos: {x: cx +   0, y: cy -  50}, vel: {x: 0, y: 0}, mass: Infinity, visible: false},
+            {pos: {x: cx +   0, y: cy +  50}, vel: {x: 0, y: 0}, mass: Infinity, visible: false},
+            {pos: {x: cx + 100, y: cy - 100}, vel: {x: 0, y: 0}, mass: Infinity, visible: false},
+            {pos: {x: cx + 100, y: cy -  25}, vel: {x: 0, y: 0}, mass: Infinity, visible: false},
+            {pos: {x: cx + 100, y: cy +  25}, vel: {x: 0, y: 0}, mass: Infinity, visible: false},
+            {pos: {x: cx + 100, y: cy + 100}, vel: {x: 0, y: 0}, mass: Infinity, visible: false},
         ];
         const springs = new Map([
             // the spring length is the distance between the nodes when they are in
@@ -78,12 +86,6 @@
             // wait for the next frame
             requestAnimationFrame(onFrame);
         }
-
-        const ctx = document.getElementById('canvas_result').getContext('2d');
-        ctx.canvas.style.width = "100%";
-        ctx.canvas.style.height = "400px";
-        ctx.canvas.width = ctx.canvas.offsetWidth;
-        ctx.canvas.height = ctx.canvas.offsetHeight;
 
         // start execution
         requestAnimationFrame(onFrame);
