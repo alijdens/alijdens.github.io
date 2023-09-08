@@ -25,7 +25,7 @@ Each node in the graph is simulated as a [point mass](https://en.wikipedia.org/w
 We'll go through the basic equations needed to simulate the system and then show how to implement it in JavaScript, step by step.
 
 {: .box-note}
-<center><b>All the code is available in this <a href="https://codesandbox.io/s/spring-mass-system-pktlhk" target="_blank">CodeSandbox</a></b></center>
+<center><b>All the code is available in <a href="https://codesandbox.io/s/spring-mass-system-pktlhk" target="_blank">CodeSandbox</a></b></center>
 
 ## Rendering loop
 
@@ -142,9 +142,9 @@ $$ acceleration = \sum^i{\frac{F_i}{m}} $$
 
 This means that in order to calculate an objects we will have to calculate all the (vectorial) forces acting on it and sum them up. In our case, the only force acting on the nodes will be that of the springs that connect them, but this could be any force, as long as we know how to calculate it.
 
-### Hook's law
+### Hooke's law
 
-Now that we know that we'll have to calculate the forces acting on each node, we'll have to know how to calculate the force imposed by the springs on the masses. This is where [Hook's law](https://en.wikipedia.org/wiki/Hooke%27s_law){:target="_blank"} comes in handy:
+Now that we know that we'll have to calculate the forces acting on each node, we'll have to know how to calculate the force imposed by the springs on the masses. This is where [Hooke's law](https://en.wikipedia.org/wiki/Hooke%27s_law){:target="_blank"} comes in handy:
 
 > The force exerted by a spring is proportional to the distance the spring is stretched or compressed from its equilibrium position.
 
@@ -294,5 +294,6 @@ Finally, it's just a matter of organizing the nodes in the screen (using any lay
      sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
    ></iframe>
 <center><p style="margin-top: 0; padding-top: 0; color: gray">
-    Final result. Feel free to show the fixed nodes to see how they are positioned by modifying the variables in the editor.
+    Final result. Change the <b>hideSpecialElements</b> variable to <b>false</b> to show the fixed nodes and springs
+    behind the scenes.
 </p></center>
