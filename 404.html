@@ -5,9 +5,20 @@ permalink: /404.html
 ---
 
 <div class="text-center">
-  <h1>Whoops, this page doesn't exist.</h1>
-  <h1>Move along. (404 error)</h1>
+  <h1 style="font-size: 5rem;">404</h1>
+  <h2>Whoa, I wasn't expecting visitors</h2>
+  <h2>Next time, knock before entering... or not</h2>
   <br/>
 
-  <img src="{{ 'assets/img/404-southpark.jpg' | relative_url }}" alt="Not found" />
+  <img id="404_image" width="700" height="700" alt="404 - Not found" />
 </div>
+
+<script>
+  const img = document.getElementById('404_image');
+
+  // select a random image numbers
+  const imgId = Math.floor(Math.random() * 5) + 1;
+
+  // set the image source
+  img.setAttribute('src', "{{ 'assets/img/404-deadpool-shower-' | relative_url }}" + imgId + ".png");
+</script>
