@@ -152,6 +152,9 @@ That's it, this is the clever trick in which we rely on to hide the `varray_t` a
 You might have noticed that the flexible array member in the `varray_t` is of type `uint8_t`. This is because we want to be able to store any type of data in the array, so we use the most granular sized type (i.e. a byte). There is a problem, however, with more complex data types because we need them to be stored in a memory address that is a multiple of its size (see [data alignment](https://en.wikipedia.org/wiki/Data_structure_alignment) for more details). Let's see this with an example:
 
 ![varray_t](/assets/posts/varray/address_alignment.svg)
+<center><p style="margin-top: 0; padding-top: 0; color: gray;">
+    On the left, the memory address and on the right what is used for.
+</p></center>
 
 So, in summary, we have to make sure that the `data[]` field is aligned to the size of the largest data type we want to store in the array. If we assume the largest data type is a 64 bit integer, then a possible solution is to add 2 `size_t` fields to the `varray_t` **before** the array:
 
