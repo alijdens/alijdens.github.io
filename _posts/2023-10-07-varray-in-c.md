@@ -7,7 +7,7 @@ thumbnail-img: /assets/posts/varray/header.jpg
 share-img: /assets/posts/varray/header.jpg
 tags: [C, programming, array, dynamic, resizable, varray]
 toc: true
-last-updated: 2023-10-07
+last-updated: 2023-10-11
 ---
 
 # Auto-resizable C arrays
@@ -71,26 +71,40 @@ Another option would be to create a different instance of this array specialized
 We will implement an array that will look similar to native C pointers but still resize automatically when needed. We will call this data structure a `varray_t` (variable array):
 
 ```c
+// varrays are declared as normal pointers and then must be
+// initialized using varray_init
+// the type of the pointer defines the elements.
+// for example, to create a varray of ints:
 int *va = NULL;
-varray_init( va, 1 );
+varray_init( va, 1 );  // with pre-allocated space for 1 element
 
 // pushing elements resizes the array under the hood
+// the array is resized to fit the new elements
 varray_push( va, 123 );
+varray_push( va, 0 );
+varray_push( va, -1 );
 varray_push( va, 1235 );
 
-// using pop reduces the length
-printf( "%d\n", varray_pop( a ) );  // 1235
+// using pop reduces the length (but does not decrease the
+// allocated buffer)
+printf( "%d\n", varray_pop( va ) );  // 1235
 
 // elements can be accessed using native C syntax
-printf( "%d\n", a[0] );  // 123
-printf( "%zu\n", varray_len( a ) );       // 1
-printf( "%zu\n", varray_capacity( a ) );  // 2
+printf( "%d\n", va[0] );  // 123
+printf( "%zu\n", varray_len( va ) );       // 3
+printf( "%zu\n", varray_capacity( va ) );  // 4
+
+// you can also reassign elements like a normal array
+va[0] = 0;
 
 // attempting to push a different type results in a compile error
 varray_push( va, 0.5 );  // COMPILE ERROR!
 
-varray_release( a );
+varray_release( va );
 ```
+
+{: .box-note}
+You can use any type, even `struct`s, check out [this](https://github.com/alijdens/zip-stream/blob/7e3c75946d11e2aa7c37b974aa5c76f1ffd88d90/tests/varray_t.c#L116-L144) test.
 
 ## The key idea behind this
 
