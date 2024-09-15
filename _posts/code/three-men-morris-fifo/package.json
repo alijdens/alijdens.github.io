@@ -1,0 +1,40 @@
+{
+  "name": "minimax-animation",
+  "version": "1.0.0",
+  "homepage": "./",
+  "description": "Animated minimax demonstration",
+  "keywords": [
+    "minimax"
+  ],
+  "main": "src/index.tsx",
+  "dependencies": {
+    "@emotion/react": "^11.13.0",
+    "@emotion/styled": "^11.13.0",
+    "@mui/material": "^5.16.7",
+    "@xyflow/react": "12.0.4",
+    "loader-utils": "3.2.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-scripts": "5.0.1",
+    "use-immer": "^0.10.0"
+  },
+  "devDependencies": {
+    "@types/react": "18.2.38",
+    "@types/react-dom": "18.2.15",
+    "typescript": "4.4.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build_no_cycles_minimax": "REACT_APP_ALGORITHM=regular REACT_APP_GRAPH=noCycles react-scripts build && mv build output/no_cycles_minimax",
+    "build_cycles_minimax": "REACT_APP_ALGORITHM=regular REACT_APP_GRAPH=withCycle react-scripts build && mv build output/cycles_minimax",
+    "build_cycles_minimax_fix": "REACT_APP_ALGORITHM=cycleDetection REACT_APP_GRAPH=withCycle react-scripts build && mv build output/cycles_minimax_fix",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
+}
