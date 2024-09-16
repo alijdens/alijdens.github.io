@@ -151,3 +151,11 @@ For example, if we find ourselves in the scenario presented before (where the pl
 
 {: .box-note}
 We can use the **inverse** of the number of steps to the victory (i.e. the number of nodes until the terminal state) as the score. For example, if have 2 paths, one that needs 3 moves and another that needs 10 to win, the scores would be `0.333...` and `0.1` respectively. Note how the shortest path has the highest score.
+
+## Conclusion
+
+Adding cycles to the game made it a bit harder to solve. While the algorithm described in this post finds the correct solution to the problem, traditional `minimax` can be used to calculate the best play at runtime (which is useful for games where we cannot pre-compute the whole graph). This algorithm requires the whole graph so it might not be usable in instances of the game where the grid is larger.
+
+If you want to see the complete list of states and their score, you can check out the file containing them [here](https://github.com/alijdens/three-tac-toe/blob/main/ui/src/assets/scores.json).
+
+Each key in the JSON object is a string encoding the game state (you can check out the explanation on how to interpret it [here](https://github.com/alijdens/three-tac-toe/blob/6a9984dd5f698e0731604cd9fa4f9450c3f2969e/ai/game.py#L15)). We can use the JSON file to decide the best nex move by calculating the scores of the possible next states and then selecting the min or max (depending which player you are) among the possibilities.
