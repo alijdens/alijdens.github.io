@@ -7,7 +7,7 @@ thumbnail-img: /assets/posts/three-mens-morris/header.png
 share-img: /assets/posts/three-mens-morris/header.png
 tags: [tic-tac-toe, three-mens-morris, graphs]
 toc: true
-last-updated: 2024-09-15
+last-updated: 2024-09-25
 ---
 
 # Solving three men's morris FIFO version
@@ -36,6 +36,13 @@ We can treat the game states as a [tree](https://en.wikipedia.org/wiki/Tree_(dat
     Note how we use a single node to represent the last state, which is obtained by following different paths from the beginning.
 </p></center>
 
+Tic-tac-toe is quite simple to solve: explore the graph of possible decisions and then pick the most convenient choice for the player in their corresponding turn. Propagate that decision backwards from the terminal states (i.e. win, draw or lose) until the beginning and then you'll have an answer to whether a particular decision can lead to a victory, defeat or draw.
+
+In the terminal states we would just set the score to:
+* 1 if the maximizing player wins
+* -1 if the minimizing player wins
+* 0 if we reached a draw
+
 Here's a demonstration of minimax (use the `Step` button to advance the algorithm):
 
 <iframe src="/assets/posts/three-mens-morris/examples/no_cycles_minimax/index.html"
@@ -52,9 +59,7 @@ Here's a demonstration of minimax (use the `Step` button to advance the algorith
 
 ## Differences with classic tic-tac-toe
 
-Tic-tac-toe is quite simple to solve: explore the graph of possible decisions and then pick the most convenient choice for the player in their corresponding turn. Propagate that decision backwards from the terminal states (i.e. win, draw or lose) until the beginning and then you'll have an answer to whether a particular decision can lead to a victory, defeat or draw.
-
-If we add this new rule that the oldest piece placed in the board is deleted then we have a very important change in this logic: **there's no more draw** (at least in the same sense as the classic game) because we will always have an available place to move but we can **end up in an infinite cycle** where each player just prevents the other one from placing 3 in a row (which we can consider a technical draw). In more mathematical terms, this means that **we have now introduced cycles to the graph**, which is a big problem if we want to apply the same logic as we do for classic tic-tac-toe. Consider applying minimax to the following graph:
+If we add the new rule that the oldest piece placed in the board is deleted then we have a very important change in this logic: **there's no more draw** (at least in the same sense as the classic game) because we will always have an available place to move but we can **end up in an infinite cycle** where each player just prevents the other one from placing 3 in a row (which we can consider a technical draw). In more mathematical terms, this means that **we have now introduced cycles to the graph**, which is a big problem if we want to apply the same logic as we do for classic tic-tac-toe. Consider applying minimax to the following graph:
 
 {: style="text-align:center"}
 ![order-matters](/assets/posts/three-mens-morris/cycle.svg)
@@ -104,9 +109,9 @@ At this point I started investigating the reason why this was happening and unde
 
 We can see in the example that the problem is partially labelling a path as a draw when we don't actually know some other alternative path to the cycle leads to losing state. It may now be obvious that the answer to this problem is to **first solve the paths that can force an outcome** and then explore the other ones to effectively determine if the optimal play leads to a cycle.
 
-### Solving terminal states
+### Solution: Solving terminal states
 
-This ones is easy: we start by building the entire game graph and then we move backwards from the terminal states labeling all nodes that can force that state (like doing `minimax` but stopping when we don't have a definitive answer):
+We saw before that the problem is caused by assuming both players will stay on the cycle before actually checking if one of them could "break" it by choosing a more advantageous move that leads to a win. To work around this problem, we start by building the entire game graph and then move backwards from the terminal states, labeling all nodes that can force that outcome (like doing `minimax` but stopping when we don't have a definitive answer):
 
 1. start by scoring all terminal nodes accordingly (+1 if maximizing player wins, -1 otherwise)
 2. put all the nodes that have an `in` edge to those nodes into a queue
