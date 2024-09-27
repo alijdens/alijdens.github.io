@@ -16,13 +16,13 @@
             font-size: 12px;
         }
         #container {
-            width: 50%;
             margin: 0 auto;
             display: block;
         }
         svg {
             display: block;
-            margin: auto;
+            width: 100%;
+            margin: 0 auto;
         }
     </style>
 </head>
@@ -32,15 +32,15 @@
     <label for="intelligenceSlider">Intelligence factor: </label>
     <input type="range" id="intelligenceSlider" min="0" max="1" step="0.01" value="1">
     <span id="intelligenceFactor">1</span>
+    <svg id="barChart" width="600" height="300"></svg>
 </div>
 
-<svg id="barChart" width="600" height="300"></svg>
 
 <script>
     const baseScores = [-0.25, -0.25, 0.1, 0, 0.05, 0.35];
 
-    const svgWidth = 600;
-    const svgHeight = 300;
+    const svgWidth = Math.min(window.innerWidth, 600);
+    const svgHeight = Math.min(window.innerHeight * 0.8, 300);
     const margin = {top: 20, right: 30, bottom: 40, left: 40};
     const chartWidth = svgWidth - margin.left - margin.right;
     const chartHeight = svgHeight - margin.top - margin.bottom;
@@ -58,6 +58,8 @@
     const svg = d3.select("#barChart")
         .attr("width", svgWidth)
         .attr("height", svgHeight)
+        .attr("viewBox", `-${(window.innerWidth-svgWidth)/2} 0 ${svgWidth} ${svgHeight}`)
+        .attr("preserveAspectRatio", "xMinYMin meet")
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
