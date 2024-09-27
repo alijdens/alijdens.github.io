@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distribution Visualization with Temperature</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style>
+        .bar {
+            fill: steelblue;
+        }
+        .shadow-bar {
+            fill: lightgray;
+        }
+        .axis-label {
+            font-size: 12px;
+        }
+        #container {
+            width: 50%;
+            margin: 0 auto;
+            display: block;
+        }
+        svg {
+            display: block;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+
+<div id="container">
+    <label for="intelligenceSlider">Intelligence factor: </label>
+    <input type="range" id="intelligenceSlider" min="0" max="1" step="0.01" value="1">
+    <span id="intelligenceFactor">1</span>
+</div>
+
+<svg id="barChart" width="600" height="300"></svg>
+
+<script>
+    const baseScores = [-0.25, -0.25, 0.1, 0, 0.05, 0.35];
+
+    const svgWidth = 600;
+    const svgHeight = 300;
+    const margin = {top: 20, right: 30, bottom: 40, left: 40};
+    const chartWidth = svgWidth - margin.left - margin.right;
+    const chartHeight = svgHeight - margin.top - margin.bottom;
+
+    const values = calculateDistribution(1);
+    const xScale = d3.scaleBand()
+        .domain([0, 1, 2, 3, 4, 5])
+        .range([0, chartWidth])
+        .padding(0.1);
+
+    const yScale = d3.scaleLinear()
+        .domain([-0.3, 1])
+        .range([chartHeight, 0]);
+
+    const svg = d3.select("#barChart")
+        .attr("width", svgWidth)
+        .attr("height", svgHeight)
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    svg.append("g")
+        .attr("transform", `translate(0,${yScale(0)})`)
+        .call(d3.axisBottom(xScale).tickFormat(d => d + 1))
+        .attr("class", "axis-label");
+
+    svg.append("g")
+        .call(d3.axisLeft(yScale).ticks(5))
+        .attr("class", "axis-label");
+
+    const shadowBars = svg.selectAll(".shadow-bar")
+        .data(baseScores)
+        .enter()
+        .append("rect")
+        .attr("class", "shadow-bar")
+        .attr("x", (d, i) => xScale(i))
+        .attr("y", d => d >= 0 ? yScale(d) : yScale(0))  // For negative values, y starts at 0
+        .attr("width", xScale.bandwidth())
+        .attr("height", d => Math.abs(yScale(d) - yScale(0)));  // Adjust height for negative bars
+
+    // Draw dynamic bars (foreground, changeable with temperature)
+    let bars = svg.selectAll(".bar")
+        .data(values)
+        .enter()
+        .append("rect")
+        .attr("class", "bar")
+        .attr("x", (d, i) => xScale(i))
+        .attr("y", d => d >= 0 ? yScale(d) : yScale(0))  // For negative values, y starts at 0
+        .attr("width", xScale.bandwidth())
+        .attr("height", d => Math.abs(yScale(d) - yScale(0)));  // Adjust height for negative bars
+
+    function updateBars(distribution) {
+        bars.data(distribution)
+            .transition()
+            .duration(500)
+            .attr("y", d => d >= 0 ? yScale(d) : yScale(0))
+            .attr("height", d => Math.abs(yScale(d) - yScale(0)));
+    }
+
+    function softmax(values, intelligenceFactor) {
+        const T = Math.exp(-intelligenceFactor * 9) * 45;
+        const expValues = values.map(v => Math.exp(v / T));
+        const sumExp = d3.sum(expValues);
+        return expValues.map(v => v / sumExp);
+    }
+
+    function calculateDistribution(intelligenceFactor) {
+        return softmax(baseScores, intelligenceFactor);
+    }
+
+    d3.select("#intelligenceSlider").on("input", function() {
+        const intelligenceFactor = +this.value;
+        d3.select("#intelligenceFactor").text(intelligenceFactor);
+        const newDistribution = calculateDistribution(intelligenceFactor);
+        updateBars(newDistribution);
+    });
+
+</script>
+
+</body>
+</html>

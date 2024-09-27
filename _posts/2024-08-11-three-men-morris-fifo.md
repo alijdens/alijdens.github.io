@@ -23,7 +23,7 @@ The source code is available in Github: [`https://github.com/alijdens/three-tac-
 As mentioned before, classic tic-tac-toe can be solved by using [minimax](https://en.wikipedia.org/wiki/Minimax). We can model our game states and transitions as a graph that we walk is such a way that we find the most advantageous move for each player and propagate those decisions down to the initial state. For example, we can build a graph for the following state by enumerating the current player's (`X`) possible actions and later the opponent's (`O`) actions:
 
 {: style="text-align:center"}
-![order-matters](/assets/posts/three-mens-morris/state-transitions.svg)
+![state transitions](/assets/posts/three-mens-morris/state-transitions.svg)
 <center><p style="margin-top: 0; padding-top: 0; color: gray;">
     For simplicity, we'll represent states as circles throughout this post. Note that each level in the tree represents a player's turn and each edge is a possible choice for the next move.
 </p></center>
@@ -31,7 +31,7 @@ As mentioned before, classic tic-tac-toe can be solved by using [minimax](https:
 We can treat the game states as a [tree](https://en.wikipedia.org/wiki/Tree_(data_structure)) but that would make some branches to be repeated, making `minimax` need to explore much more states than actually needed. If we turn this into a graph where duplicated states are represented by the same node then we reduce the search by not processing the same state twice:
 
 {: style="text-align:center"}
-![order-matters](/assets/posts/three-mens-morris/state-graph.svg)
+![state graph](/assets/posts/three-mens-morris/state-graph.svg)
 <center><p style="margin-top: 0; padding-top: 0; color: gray;">
     Note how we use a single node to represent the last state, which is obtained by following different paths from the beginning.
 </p></center>
@@ -62,7 +62,7 @@ Here's a demonstration of minimax (use the `Step` button to advance the algorith
 If we add the new rule that the oldest piece placed in the board is deleted then we have a very important change in this logic: **there's no more draw** (at least in the same sense as the classic game) because we will always have an available place to move but we can **end up in an infinite cycle** where each player just prevents the other one from placing 3 in a row (which we can consider a technical draw). In more mathematical terms, this means that **we have now introduced cycles to the graph**, which is a big problem if we want to apply the same logic as we do for classic tic-tac-toe. Consider applying minimax to the following graph:
 
 {: style="text-align:center"}
-![order-matters](/assets/posts/three-mens-morris/cycle.svg)
+![cycle](/assets/posts/three-mens-morris/cycle.svg)
 <center><p style="margin-top: 0; padding-top: 0; color: gray;">
     If we navigate the graph, we'd never find a terminal node and so we would be cycling over it forever.
 </p></center>
@@ -144,7 +144,7 @@ If we inspect the scores of the choices available in the initial state (in the a
 At this point I started testing the AI by playing against it and noticed that in some cases it was allowing very obvious losses (like it didn't try). For example, I could be in the following situation:
 
 {: style="text-align:center"}
-![order-matters](/assets/posts/three-mens-morris/almost-win.png){:width="20%"}
+![almost win](/assets/posts/three-mens-morris/almost-win.png){:width="20%"}
 
 and the AI would not try to block me from placing three in a row. This happens because (in some states) the AI knows that no matter what choice it makes the other player can always force a win. One interesting point about this is that the AI _would_ be right **if it happened to be playing an optimal opponent**. This is however **not** true for most humans and so it's very likely that they wouldn't actually know that they can win, so the AI still has a chance if it makes the human player pick a wrong choice in the future.
 
@@ -156,6 +156,53 @@ For example, if we find ourselves in the scenario presented before (where the pl
 
 {: .box-note}
 We can use the **inverse** of the number of steps to the victory (i.e. the number of nodes until the terminal state) as the score. For example, if have 2 paths, one that needs 3 moves and another that needs 10 to win, the scores would be `0.333...` and `0.1` respectively. Note how the shortest path has the highest score.
+
+### AI intelligence levels
+
+While developing the AI I thought it would be cool to add a setting to dumb it down. The way I chose to do this is the following: consider we are in some game state where some moves lead to a loss, some other to a tie or a win. As explained before, we can easily get the scores for each of those moves. Let's image we are in the following situation:
+
+{: style="text-align:center"}
+![scores](/assets/posts/three-mens-morris/scores.svg)
+<center><p style="margin-top: 0; padding-top: 0; color: gray;">
+    Empty boxes show the (invented) scores calculated by the algorithm.
+</p></center>
+
+If we want the AI to play **perfectly**, then we can choose any of the 2 boxes with red scores (-0.25), which means that we'd win in 4 moves (remember that the score is the inverse of the number of moves until the end of the game: `0.25 = 1/4`). We could "throw a coin" and select one of those based on the result. However, if we want the AI to make mistakes, we could introduce a small probability of it picking any of the other moves. Depending on how dump we want it to be, we could assign higher probabilities to worst outcomes. For example, we could assign 0.4 to each of the winning moves, 0.1 to the draw and the rest divide it to the losing scenarios (giving more weight to smallest values). The way I wanted the AI to behave was the following:
+
+* if the intelligence is at it's maximum value, then we'd assign equal probability to the best moves possible (following the previous example, we'd assign 50% chance to each of the moves with -0.25 score).
+* if the intelligence is set to "dumbest", then we'd assign uniform probability to all moves (i.e. play totally random).
+
+One way to achieve this is to use the [Softmax](https://en.wikipedia.org/wiki/Softmax_function) function to convert the scores to a probability distribution.
+
+{: .box-note}
+Softmax will assign more weight to larger values, so if we are playing the minimizer we'd have to multiply the scores by -1 to make those outcomes more probable.
+
+The way in which we can favor moves can be by controlling the *temperature*. The temperature is a parameter that changes the distribution in the way we want: 0 temperature means that all the probability is concentrated in the largest value while higher numbers tend to distribute the values more evenly:
+
+$$ P_{i} = \frac{exp(score_i / T)}{\sum_j{exp(score_j / T)}} $$
+
+{: style="color:gray; font-size: 80%; text-align: center;"}
+Softmax with temperature: the probability `P` assigned to move **_i_** will be the exponential of the corresponding *score* divided by the temperature, all of that divided by the sum of the rest.
+
+For the game, I wanted to create a gradual change in the intelligence from 0 (dumb) to 100 (perfect player). The temperature changes the distribution very aggressively, so I had to create an *intelligence factor* which was converted to the temperature using a hand crafted function (by testing empirically) which was then plugged into the scores softmax:
+
+$$ T = e^{-intelligence \cdot 9} \cdot 45 $$
+
+{: style="color:gray; font-size: 80%; text-align: center;"}
+An example of a conversion of the **_intelligence_** factor into the temperature **_T_**.
+
+Here's an example of how the distribution would look like for the scores shown before:
+
+<iframe src="/assets/posts/three-mens-morris/distribution.html"
+     style="width:100%; height:320px; border:0; border-radius: 4px; overflow:hidden; padding: auto;"
+     title="softmax with temperature"
+     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+   ></iframe>
+
+{: style="color:gray; font-size: 80%; text-align: center;"}
+Each bar represents a different move. The blue ones represent the probability assigned to that move and the
+gray ones show the score associated to that move. Try different intelligence values by moving the slider and
+see how the probabilities change.
 
 ## Conclusion
 
